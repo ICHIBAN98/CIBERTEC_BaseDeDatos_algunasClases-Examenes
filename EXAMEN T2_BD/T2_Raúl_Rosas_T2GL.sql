@@ -1,0 +1,351 @@
+USE MASTER
+GO
+
+IF DB_ID('TIENDA_NEGOCIO')IS NOT NULL
+BEGIN
+ DROP DATABASE TIENDA_NEGOCIO
+END
+GO
+
+CREATE DATABASE TIENDA_NEGOCIO
+
+SP_HELPDB TIENDA_NEGOCIO
+GO
+
+USE TIENDA_NEGOCIO
+GO
+
+IF OBJECT_ID('Distritos') IS NOT NULL
+BEGIN  
+  DROP TABLE Distritos
+END
+GO
+
+CREATE TABLE Distritos
+(
+IdDistrito  CHAR(8)   NOT NULL,
+nom_dis     VARCHAR(30) NOT NULL,
+iniciales	VARCHAR(6)	NOT NULL,
+PRIMARY KEY (IdDistrito)
+)
+GO
+
+IF OBJECT_ID('Usuarios') IS NOT NULL
+BEGIN  
+  DROP TABLE Usuarios
+END
+GO
+
+CREATE TABLE Usuarios
+(
+IdUsuario	CHAR(8)   NOT NULL,
+nom_usu     VARCHAR(50) NOT NULL,
+ape_usu     VARCHAR(50) NOT NULL,
+dir_usu     VARCHAR(70) NOT NULL,
+tel_usu     VARCHAR(12) NOT NULL,
+clave		VARCHAR(25)	NOT NULL,
+IdDistrito  CHAR(8)   NOT NULL,
+PRIMARY KEY (IdUsuario),
+FOREIGN KEY (IdDistrito) REFERENCES Distritos
+)
+GO
+
+IF OBJECT_ID('Clientes') IS NOT NULL
+BEGIN  
+  DROP TABLE Clientes
+END
+GO
+
+CREATE TABLE Clientes
+(
+IdCliente	CHAR(8)   NOT NULL,
+nom_cli     VARCHAR(50) NOT NULL,
+ape_cli     VARCHAR(50) NOT NULL,
+dir_cli     VARCHAR(70) NOT NULL,
+tel_cli     VARCHAR(12) NOT NULL,
+Ruc_cli     VARCHAR(12) NOT NULL,
+DNI_cli     VARCHAR(8) NOT NULL,
+Email_cli     VARCHAR(35) NOT NULL,
+IdDistrito  CHAR(8)   NOT NULL,
+PRIMARY KEY (IdCliente),
+FOREIGN KEY (IdDistrito) REFERENCES Distritos
+)
+GO
+
+IF OBJECT_ID('EncabezadoBoleta') IS NOT NULL
+BEGIN  
+  DROP TABLE EncabezadoBoleta
+END
+GO
+
+CREATE TABLE EncabezadoBoleta
+(
+IdEnBol			CHAR(15)	NOT NULL,
+Fech_Bol		DATE		NOT NULL,
+Total_Bol		MONEY		NOT NULL,
+Anulado			BIT			NOT NULL,
+Transferido		BIT			NOT NULL,
+Desc_Bol		MONEY		NOT NULL,
+IdCliente		CHAR(8)		NOT NULL,
+PRIMARY KEY (IdEnBol),
+FOREIGN KEY (IdCliente) REFERENCES Clientes
+)
+GO
+
+IF OBJECT_ID('EncabezadoFactura') IS NOT NULL
+BEGIN  
+  DROP TABLE EncabezadoFactura
+END
+GO
+
+CREATE TABLE EncabezadoFactura
+(
+IdEnFac			CHAR(15)	NOT NULL,
+Fech_Fac		DATE		NOT NULL,
+IGV				MONEY		NOT NULL,
+SubTotal_Fac	MONEY		NOT NULL,
+Anulado			BIT			NOT NULL,
+Transferido		BIT			NOT NULL,
+Desc_Fac		MONEY		NOT NULL,
+IdCliente		CHAR(8)		NOT NULL,
+PRIMARY KEY (IdEnFac),
+FOREIGN KEY (IdCliente) REFERENCES Clientes
+)
+GO
+
+IF OBJECT_ID('Articulos') IS NOT NULL
+BEGIN  
+  DROP TABLE Articulos
+END
+GO
+
+CREATE TABLE Articulos
+(
+IdArticulo			CHAR(8)			NOT NULL,
+Modelo				VARCHAR(15)		NOT NULL,
+Plataforma			VARCHAR(10)		NOT NULL,
+Caracteristicas		VARCHAR(150)	NOT NULL,
+pre_arti			MONEY			NOT NULL,
+stock_arti			INT				NOT NULL,
+PRIMARY KEY (IdArticulo)
+)
+GO
+
+IF OBJECT_ID('DetalleFactura') IS NOT NULL
+BEGIN  
+  DROP TABLE DetalleFactura
+END
+GO
+
+CREATE TABLE DetalleFactura
+(
+IdEnFac			CHAR(15)	NOT NULL,
+Cant_det		INT		NOT NULL,
+Prec_det		MONEY		NOT NULL,
+Importe			MONEY			NOT NULL,
+IdArticulo		CHAR(8)		NOT NULL,
+PRIMARY KEY (IdEnFac,IdArticulo),
+FOREIGN KEY (IdEnFac) REFERENCES EncabezadoFactura,
+FOREIGN KEY (IdArticulo) REFERENCES Articulos
+)
+GO
+
+IF OBJECT_ID('DetalleBoleta') IS NOT NULL
+BEGIN  
+  DROP TABLE DetalleBoleta
+END
+GO
+
+CREATE TABLE DetalleBoleta
+(
+IdEnBol			CHAR(15)	NOT NULL,
+Cant_det		INT		NOT NULL,
+Prec_det		MONEY		NOT NULL,
+Importe			MONEY			NOT NULL,
+IdArticulo		CHAR(8)		NOT NULL,
+PRIMARY KEY (IdEnBol,IdArticulo),
+FOREIGN KEY (IdEnBol) REFERENCES EncabezadoBoleta,
+FOREIGN KEY (IdArticulo) REFERENCES Articulos
+)
+GO
+
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+
+---PREGUNTA 1
+
+INSERT INTO Distritos
+VALUES
+('D001','BARRANCO','BRC'),
+('D002','CARABAYLLO','CBYL'),
+('D003','SAN ISIDRO','SISD'),
+('D004','CERCADO DE LIMA','CLIM'),
+('D005','LINCE','LIN'),
+('D006','LOS OLIVOS','LOLV'),
+('D007','CHORRILLOS','CHR'),
+('D008','COMAS','COM'),
+('D009','MIRAFLORES','MRFL'),
+('D010','VILLA EL SALVADOR','VES')
+GO
+
+SELECT * FROM Distritos
+GO
+
+INSERT INTO Usuarios
+VALUES
+('U001','JUAN','RODRIGUEZ','AV.CANEVARO 648','978669784','LosPoderesJiJiJi','D005'),
+('U002','MARIA','GARCIA','AV.CANADA 848','958477859','cuentita019','D005'),
+('U003','CARLOS','LOPEZ','AV.ALAMEDA SUR 118','987687799','UsuarioOoO','D007'),
+('U004','ANA','PEREZ','AV.BALLESTAS 187','999875687','soyChorrillano','D007'),
+('U005','LUIS','GONZALEZ','AV. EL SOL','997857699','LuisitoSol','D010'),
+('U006','GABRIELA','MARTINEZ','AV. EL LAS PALOMAS','998789325','GabySita85','D010'),
+('U007','PABLO','FERNANDEZ','AV. LARCOMAR 485','945778554','PablitoSasa','D009'),
+('U008','VALENTINA','RAMIREZ','AV. AREQUIPA 114','999555888','CuentaVale','D009'),
+('U009','DIEGO','TORRES','AV. REVOLUCION 847','987987887','ElTorresAAA','D008'),
+('U010','SOFIA','DIAZ','AV. ROGELIOS 444','999457877','SofitaDiaz87','D008')
+GO
+
+SELECT * FROM Usuarios
+GO
+
+INSERT INTO Clientes
+VALUES
+('CL001','JORGE','MARTINEZ','AVENIDA JAVIER PRADO 1234','987654321','20123456789','12345678','JUANRODRIGUEZ@gmail.com','D001'),
+('CL002','ANDREA','GARCIA','CALLE LAS FLORES 567','933456789','20456789012','23456789','MARIAGARCIA@hotmail.com','D006'),
+('CL003','RAUL','LOPEZ','URBANIZACION SAN ISIDRO 890','912345678','20789012345','34567890','CARLOSLOPEZ@gmail.com','D007'),
+('CL004','LAURA','PEREZ','AVENIDA BRASIL 4567','935678901','21012345678','45678901','ANAPEREZ@hotmail.com','D005'),
+('CL005','FERNANDO','GONZALEZ','JR. HUANCAYO 321','926789012','21345678901','56789012','LUISGONZALEZ@gmail.com','D002'),
+('CL006','PATRICIA','MARTINEZ','AV. TACNA 7890','998765432','21678901234','67890123','GABRIELAMARTINEZ@hotmail.com','D007'),
+('CL007','SERGIO','FERNANDEZ','JR. LOS PINOS 234','911234567','22012345678','78901234','PABLOFERNANDEZ@gmail.com','D009'),
+('CL008','CARMEN','RAMIREZ','CALLE SANTA ROSA 901','977654321','22345678901','89012345','VALENTINARAMIREZ@hotmail.com','D001'),
+('CL009','LUCAS','TORRES','URB. LOS OLIVOS 654','966789012','22678901234','90123456','DIEGOTORRES@gmail.com','D006'),
+('CL010','MONICA','DIAZ','AV. LARCO 1122','944567890','23012345678','01234567','SOFIADIAZ@hotmail.com','D010')
+GO
+
+SELECT * FROM Clientes
+GO
+
+INSERT INTO EncabezadoBoleta
+VALUES
+('EB001', '2023-10-15', '123.45', '0', '1', '10.00', 'CL005'),
+('EB002', '2023-09-30', '67.89', '1', '0', '5.00', 'CL002'),
+('EB003', '2023-10-05', '99.99', '0', '1', '7.50', 'CL001'),
+('EB004', '2023-09-20', '45.67', '0', '1', '8.75', 'CL003'),
+('EB005', '2023-10-12', '78.90', '1', '0', '12.75', 'CL006'),
+('EB006', '2023-09-25', '56.78', '0', '1', '9.25', 'CL009'),
+('EB007', '2023-10-08', '33.33', '0', '1', '4.20', 'CL010'),
+('EB008', '2023-09-15', '112.11', '1', '0', '15.75', 'CL004'),
+('EB009', '2023-10-10', '43.21', '0', '1', '6.60', 'CL007'),
+('EB010', '2023-09-28', '87.65', '1', '0', '11.00', 'CL008')
+GO
+
+INSERT INTO EncabezadoFactura
+VALUES
+('EF001', '2023-10-15', '12.34', '100.00', '0', '1', '5.00', 'CL001'),
+('EF002', '2023-09-30', '9.87', '78.90', '1', '0', '3.50', 'CL007'),
+('EF003', '2023-10-05', '15.67', '120.00', '0', '1', '7.20', 'CL006'),
+('EF004', '2023-09-20', '6.78', '45.67', '0', '1', '2.80', 'CL004'),
+('EF005', '2023-10-12', '18.90', '150.00', '1', '0', '9.75', 'CL005'),
+('EF006', '2023-09-25', '8.76', '67.89', '0', '1', '4.25', 'CL003'),
+('EF007', '2023-10-08', '7.89', '65.43', '0', '1', '3.10', 'CL008'),
+('EF008', '2023-09-15', '11.11', '88.88', '1', '0', '6.75', 'CL009'),
+('EF009', '2023-10-10', '9.21', '74.45', '0', '1', '4.60', 'CL002'),
+('EF010', '2023-09-28', '14.56', '115.65', '1', '0', '8.00', 'CL010')
+GO
+
+
+---PREGUNTA 2
+
+---USANDO UPDATE
+
+UPDATE Distritos
+SET  nom_dis='SAN MIGUEL'
+WHERE IdDistrito='D001'
+
+SELECT * FROM Distritos
+GO
+
+UPDATE Distritos
+SET  iniciales='SMGL'
+WHERE IdDistrito='D001'
+
+SELECT * FROM Distritos
+GO
+
+---USANDO DELETE
+
+DELETE FROM Usuarios
+WHERE IdUsuario BETWEEN 'U008' AND 'U010'
+GO
+
+SELECT * FROM Usuarios
+GO
+
+
+DELETE FROM Usuarios
+WHERE IdUsuario BETWEEN 'U005' AND 'U007'
+GO
+
+SELECT * FROM Usuarios
+GO
+
+---PREGUNTA 3
+
+---USANDO LIKE
+
+SELECT	IdDistrito AS [ID DEL DISTRITO],
+		nom_dis AS [DISTRITO],
+		iniciales AS [INICIALES]
+FROM Distritos
+WHERE nom_dis LIKE 'C%'
+ORDER BY nom_dis DESC
+GO
+
+---USANDO EL OPERADOR LÓGICO >
+
+SELECT	IdEnBol AS [ID BOLETA],
+		Fech_Bol AS [FECHA],
+		Total_Bol AS [TOTAL]
+FROM	EncabezadoBoleta
+WHERE	Total_Bol > 50
+ORDER BY Total_Bol DESC
+GO
+
+---USANDO BETWEEN
+
+SELECT		IdCliente AS [ID],
+			nom_cli AS [NOMBRE],
+			ape_cli AS [APELLIDO],
+			tel_cli AS [NUM_CELULAR],
+			DNI_cli AS [#DNI]
+FROM		Clientes
+WHERE		IdCliente BETWEEN 'CL004' AND 'CL008'
+ORDER BY	IdCliente ASC
+GO
+
+---USANDO IN
+
+SELECT		IdEnFac AS		[ID FACTURA],
+			Fech_Fac AS		[FECHA],
+			IGV AS			[IGV],
+			SubTotal_Fac AS [SUBTOTAL]
+FROM		EncabezadoFactura
+WHERE		IdEnFac IN ('EF001','EF004','EF006')
+ORDER BY	Fech_Fac DESC
+GO
+
+---PREGUNTA 4
+
+
+SELECT *
+  FROM Clientes Cli
+  INNER JOIN EncabezadoBoleta Ebol
+  ON Cli.IdCliente=Ebol.IdCliente
+GO
+
+SELECT *
+  FROM Clientes Cli
+  INNER JOIN EncabezadoFactura Efac
+  ON Cli.IdCliente=Efac.IdCliente
+GO
+
